@@ -1,0 +1,19 @@
+name: 'IP Info + Region'
+description: 'Prints agent IP and outputs Region info'
+outputs:
+  region:
+    description: "$region - $city"
+    value: ${{ steps.ip.outputs.region }}
+runs:
+  using: "composite"
+  steps:
+    - id: ip
+      run: |
+        temp_file=$(mktemp)
+        /usr/bin/curl -s https://ipinfo.io -o $temp_file
+        region=$(jq -r .region $temp_file)
+        city=$(jq -r .city $temp_file)
+        echo "region=$region - $city" >>$GITHUB_OUTPUT
+        jq . -C $temp_file
+        rm $temp_file
+      shell: bash
